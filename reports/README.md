@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-04 22:32 · état collecte : 🟠 un peu vieux (dernier passage il y a 2.0 h)_
+> _Régénéré le 2026-07-04 22:12 · état collecte : 🟢 à jour (dernier passage il y a 0.8 h)_
 
-- **Passage analysé** : 2026-07-04 20:32:38
-- **Passages collectés** : 1
+- **Passage analysé** : 2026-07-04 21:26:26
+- **Passages collectés** : 3
 - **Flotte** : 1000 véhicules sur 69 communes
 - **Prix/jour** : médiane 54 € (min 28 / max 181)
 
@@ -19,10 +19,10 @@
 | asnieres-sur-seine | 18 |
 | clichy | 17 |
 | saint-ouen-sur-seine | 15 |
-| malakoff | 14 |
 | rosny-sous-bois | 14 |
+| malakoff | 14 |
 | bois-colombes | 14 |
-| pantin | 13 |
+| vincennes | 13 |
 
 ## Parc par marque (top 8)
 
@@ -46,4 +46,7 @@
 | hybrid | 64 |
 | electric | 17 |
 
-> Un seul passage : occupation et pricing dynamique s'activent dès le 2ᵉ. Laisse la collecte tourner.
+## Demande mesurée
+- Occupation moyenne : 0.0%
+- Véhicules avec ≥1 location détectée : 0 / 1000
+- Véhicules à prix variable (pricing dynamique) : 1
