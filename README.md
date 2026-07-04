@@ -98,6 +98,16 @@ Simple mais **ne collecte que quand le PC est allumé** (trous sinon) :
 .\register_task.ps1     # tâche planifiée toutes les 20 min -> run.ps1
 ```
 
+## Voir que ça marche / visualiser
+
+- **Le rapport visuel** : ouvre le dossier **[`reports/`](reports/)** sur GitHub —
+  le `README.md` s'y affiche tout seul avec les graphiques (communes, prix,
+  marques, motorisation) et un **voyant de fraîcheur** (🟢 à jour / 🔴 arrêté).
+  Régénéré automatiquement toutes les 3 h par `.github/workflows/report.yml`.
+- **La collecte tourne ?** Onglet **Actions** du repo : des exécutions vertes
+  « Collecte GBFS Getaround », et des commits `data: passage …` qui apparaissent.
+- **En local** : `python analyze.py` régénère le rapport dans `reports/`.
+
 ## Stockage des données (append-only)
 
 **Source canonique = `data/` (CSV, committé dans git)** — portable et compatible

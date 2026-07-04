@@ -90,7 +90,9 @@ def _in_idf(lat, lon) -> bool:
 
 def run_snapshot(con: sqlite3.Connection | None = None) -> str:
     """Collecte tous les SYSTEMS, déduplique par listing_id, filtre IDF, stocke."""
-    ts = dt.datetime.now().replace(microsecond=0).isoformat()
+    # horodatage en UTC naïf (cohérent entre ta machine et les runners GitHub)
+    ts = dt.datetime.now(dt.timezone.utc).replace(microsecond=0,
+                                                  tzinfo=None).isoformat()
     own_con = con is None
     if own_con:
         con = sqlite3.connect(DB_PATH)

@@ -25,10 +25,17 @@ Ce module ne fait AUCUN réseau : il ne lit que ce que ingest.py a stocké.
 from __future__ import annotations
 import sqlite3
 import glob
+from pathlib import Path
 import pandas as pd
 import numpy as np
 
 from config import DB_PATH, DATA_DIR
+
+# colonnes attendues (pour renvoyer un tableau vide bien formé si aucune donnée)
+_COLS = ["snapshot_ts", "system_id", "listing_id", "vehicle_id", "commune",
+         "lat", "lon", "is_reserved", "is_disabled", "current_range_meters",
+         "vehicle_type_id", "make", "model", "year", "propulsion",
+         "pricing_plan_id", "hourly_rate", "daily_rate", "rental_url"]
 
 
 # --------------------------------------------------------------------------
@@ -44,13 +51,18 @@ def load_snapshots(db_path=DB_PATH) -> pd.DataFrame:
     parts = _csv_partitions()
     if parts:
         df = pd.concat([pd.read_csv(p) for p in parts], ignore_index=True)
-    else:                                             # repli SQLite
+    elif Path(db_path).exists():                      # repli SQLite local
         con = sqlite3.connect(db_path)
-        df = pd.read_sql("SELECT * FROM vehicle_snapshots", con)
+        try:
+            df = pd.read_sql("SELECT * FROM vehicle_snapshots", con)
+        except Exception:                             # base sans la table
+            df = pd.DataFrame(columns=_COLS)
         con.close()
-    df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"])
+    else:                                             # aucune donnée encore
+        df = pd.DataFrame(columns=_COLS)
+    df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"], errors="coerce")
     # clé d'identité stable : listing_id si dispo, sinon vehicle_id
-    df["uid"] = df["listing_id"].fillna(df["vehicle_id"])
+    df["uid"] = df["listing_id"].fillna(df["vehicle_id"]) if len(df) else pd.Series(dtype=object)
     return df
 
 

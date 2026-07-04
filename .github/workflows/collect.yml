@@ -15,9 +15,10 @@ on:
 permissions:
   contents: write
 
-# un seul passage à la fois : évite deux pushs concurrents
+# un seul écrivain à la fois (partagé avec le workflow rapport) : évite deux
+# pushs concurrents sur main
 concurrency:
-  group: collecte-gbfs
+  group: gbfs-repo-write
   cancel-in-progress: false
 
 jobs:
@@ -43,5 +44,6 @@ jobs:
             echo "Aucune nouvelle donnée à committer."
           else
             git commit -m "data: passage $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git pull --rebase --autostash origin main
             git push
           fi

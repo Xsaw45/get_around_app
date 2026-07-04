@@ -3,18 +3,19 @@ analyze.py — Rapport d'étude de marché depuis la base de snapshots
 ==================================================================
 
 Produit un livrable descriptif immédiat (dès le 1er passage) :
-  exports/market_report.md   — synthèse chiffrée
-  exports/market_overview.png — 4 graphiques (communes, prix, marques, énergie)
+  reports/README.md   — synthèse chiffrée (s'affiche direct en ouvrant reports/)
+  reports/overview.png — 4 graphiques (communes, prix, marques, énergie)
 
-Quand plusieurs passages seront accumulés, ajoute l'occupation et le pricing
-dynamique via features.py (voir la fin du rapport).
+Régénéré automatiquement par GitHub Actions : ouvre le dossier reports/ sur
+GitHub pour voir le rapport à jour (et donc vérifier que la collecte tourne).
 """
 from __future__ import annotations
+import datetime as dt
 import matplotlib
 matplotlib.use("Agg")                     # pas d'affichage, on écrit un PNG
 import matplotlib.pyplot as plt
 
-from config import EXPORT_DIR
+from config import REPORTS_DIR
 from features import (load_snapshots, collection_grid, market_snapshot,
                       utilization_per_vehicle, price_dynamics)
 
@@ -54,7 +55,7 @@ def _fig(last):
 
 
 def build():
-    EXPORT_DIR.mkdir(exist_ok=True)
+    REPORTS_DIR.mkdir(exist_ok=True)
     snap = load_snapshots()
     if snap.empty:
         print("Base vide — lance d'abord ingest.py.")
@@ -64,20 +65,31 @@ def build():
     n_ts = snap["snapshot_ts"].nunique()
 
     fig = _fig(last)
-    png = EXPORT_DIR / "market_overview.png"
+    png = REPORTS_DIR / "overview.png"
     fig.savefig(png, dpi=110)
     plt.close(fig)
+
+    # fraîcheur : le dernier passage est-il récent ? (preuve que ça tourne)
+    now = dt.datetime.now()
+    age_h = (now - snap["snapshot_ts"].max().to_pydatetime()).total_seconds() / 3600
+    frais = "🟢 à jour" if age_h < 2 else ("🟠 un peu vieux" if age_h < 24
+                                          else "🔴 arrêté ?")
 
     lines = [
         "# Getaround IDF — rapport d'étude de marché",
         "",
+        f"> _Régénéré le {now:%Y-%m-%d %H:%M} · état collecte : {frais} "
+        f"(dernier passage il y a {age_h:.1f} h)_",
+        "",
         f"- **Passage analysé** : {ms['horodatage']}",
-        f"- **Passages en base** : {n_ts}",
+        f"- **Passages collectés** : {n_ts}",
         f"- **Flotte** : {ms['n_vehicules']} véhicules sur "
         f"{ms['n_communes']} communes",
         f"- **Prix/jour** : médiane {last['daily_rate'].median():.0f} € "
         f"(min {last['daily_rate'].min():.0f} / "
         f"max {last['daily_rate'].max():.0f})",
+        "",
+        "![Vue d'ensemble](overview.png)",
         "",
         "## Répartition géographique (top 10 communes)",
         "",
@@ -112,7 +124,7 @@ def build():
         lines += ["", "> Un seul passage : occupation et pricing dynamique "
                   "s'activent dès le 2ᵉ. Laisse la collecte tourner."]
 
-    md = EXPORT_DIR / "market_report.md"
+    md = REPORTS_DIR / "README.md"
     md.write_text("\n".join(lines), encoding="utf-8")
     print(f"Rapport écrit : {md}")
     print(f"Graphiques  : {png}")

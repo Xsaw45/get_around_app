@@ -40,6 +40,7 @@ DATA_DIR = Path(__file__).parent / "data"
 # SQLite = miroir LOCAL optionnel (pratique pour du SQL ad hoc, non committé).
 DB_PATH = Path(__file__).parent / "getaround_gbfs.sqlite"
 EXPORT_DIR = Path(__file__).parent / "exports"       # datasets ML (parquet/csv)
+REPORTS_DIR = Path(__file__).parent / "reports"      # rapport visuel (committé)
 
 # --------------------------------------------------------------------------
 # HTTP
