@@ -1,0 +1,5 @@
+# Collecte : aucune dépendance (urllib de la stdlib suffit pour lire le GBFS).
+# Analyse & export :
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14

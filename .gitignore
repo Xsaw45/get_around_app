@@ -1,0 +1,16 @@
+# Données collectées (grossissent en continu, ne pas versionner)
+*.sqlite
+*.sqlite-journal
+exports/
+run.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
