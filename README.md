@@ -77,16 +77,18 @@ Notes :
 - Le planificateur GitHub est *best effort* : un passage peut être décalé de
   quelques minutes en forte charge. Pour une cadence stricte, voir l'option B.
 
-### Option B — VM cloud 24/7 (cadence stricte)
+### Option B — VM cloud 24/7 gratuite (cadence stricte, sans jitter)
 
-Sur une petite VM Linux (Oracle/Google free tier, ou VPS ~4 €/mois), cron :
+VM **gratuite à vie** (Google Cloud e2-micro ou Oracle Always Free) qui collecte
+toutes les 20 min et pousse dans le repo. Guide pas-à-pas + scripts prêts :
+**[`deploy/README.md`](deploy/README.md)**. En résumé, sur la VM :
 
-```cron
-*/20 * * * * cd /chemin/get_around_app && /usr/bin/python3 ingest.py
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xsaw45/get_around_app/main/deploy/vm_setup.sh | bash
 ```
 
-Puis `git add data/ && git commit && git push` en fin de script, ou analyse en
-place. Même code, sans le jitter de GitHub.
+> N'utilise qu'un seul planificateur : si tu passes à la VM, désactive le
+> workflow Actions (sinon les deux poussent en même temps).
 
 ### Option C — PC Windows (Planificateur de tâches)
 

@@ -1,0 +1,8 @@
+# Normalisation des fins de ligne (évite les soucis Windows <-> Linux).
+* text=auto
+# scripts VM : LF obligatoire (sinon le shebang casse sous Linux)
+*.sh  text eol=lf
+*.py  text eol=lf
+*.yml text eol=lf
+# scripts Windows
+*.ps1 text eol=crlf
