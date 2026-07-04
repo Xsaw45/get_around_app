@@ -2,4 +2,5 @@
 # Analyse & export :
 pandas>=2.0
 numpy>=1.24
-pyarrow>=14
+pyarrow>=14          # export Parquet (sinon repli CSV automatique)
+matplotlib>=3.7      # graphiques du rapport d'étude de marché (analyze.py)

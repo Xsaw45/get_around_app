@@ -17,7 +17,17 @@ from __future__ import annotations
 import pandas as pd
 
 from config import EXPORT_DIR
-from features import load_snapshots, presence_matrix
+from features import load_snapshots, presence_matrix, collection_grid
+
+
+def _write(df, name):
+    """Parquet si pyarrow dispo, sinon CSV (secours sans dépendance)."""
+    try:
+        df.to_parquet(EXPORT_DIR / f"{name}.parquet", index=False)
+        return f"{name}.parquet"
+    except (ImportError, ValueError):
+        df.to_csv(EXPORT_DIR / f"{name}.csv", index=False)
+        return f"{name}.csv  (pyarrow absent -> CSV ; pip install pyarrow)"
 
 
 def build():
@@ -28,13 +38,13 @@ def build():
         return
 
     # 1) brut
-    snap.to_parquet(EXPORT_DIR / "snapshots.parquet", index=False)
+    f_snap = _write(snap, "snapshots")
 
     snap["day"] = snap["snapshot_ts"].dt.floor("D")
 
     # 2) agrégat quotidien par véhicule
     #    occupation du jour = part des passages du jour où le véhicule est ABSENT.
-    pres = presence_matrix(snap)                      # uid × ts (True=présent)
+    pres = presence_matrix(snap, grid=collection_grid())  # uid × ts (True=présent)
     long = (pres.stack().rename("present").reset_index())
     long["day"] = long["snapshot_ts"].dt.floor("D")
     vday = (long.groupby(["uid", "day"])
@@ -51,19 +61,19 @@ def build():
                      daily_rate=("daily_rate", "last"),
                      hourly_rate=("hourly_rate", "last")).reset_index())
     vday = vday.merge(meta, on=["uid", "day"], how="left")
-    vday.to_parquet(EXPORT_DIR / "vehicle_daily.parquet", index=False)
+    f_vday = _write(vday, "vehicle_daily")
 
     # 3) marché par jour × commune
     mkt = (snap.groupby(["day", "commune"])
                .agg(n_vehicules=("uid", "nunique"),
                     prix_median=("daily_rate", "median"),
                     prix_moyen=("daily_rate", "mean")).reset_index())
-    mkt.to_parquet(EXPORT_DIR / "market_daily.parquet", index=False)
+    f_mkt = _write(mkt, "market_daily")
 
     print(f"Exports écrits dans {EXPORT_DIR}/ :")
-    print(f"  snapshots.parquet      {len(snap):>7} lignes")
-    print(f"  vehicle_daily.parquet  {len(vday):>7} lignes")
-    print(f"  market_daily.parquet   {len(mkt):>7} lignes")
+    print(f"  {f_snap:<40} {len(snap):>7} lignes")
+    print(f"  {f_vday:<40} {len(vday):>7} lignes")
+    print(f"  {f_mkt:<40} {len(mkt):>7} lignes")
 
 
 if __name__ == "__main__":

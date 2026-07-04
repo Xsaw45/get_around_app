@@ -43,18 +43,34 @@ def load_snapshots(db_path=DB_PATH) -> pd.DataFrame:
     return df
 
 
+def collection_grid(db_path=DB_PATH):
+    """Liste autoritative des passages de collecte (depuis run_log).
+
+    C'est la grille temporelle correcte : un véhicule ABSENT n'écrit aucune
+    ligne, donc on ne peut pas déduire les passages des seuls véhicules vus.
+    """
+    con = sqlite3.connect(db_path)
+    ts = pd.read_sql("SELECT DISTINCT snapshot_ts FROM run_log", con)
+    con.close()
+    return np.sort(pd.to_datetime(ts["snapshot_ts"]).values)
+
+
 # --------------------------------------------------------------------------
 # 1. PRÉSENCE sur la grille des passages  (la base de tout)
 # --------------------------------------------------------------------------
-def presence_matrix(snap: pd.DataFrame) -> pd.DataFrame:
+def presence_matrix(snap: pd.DataFrame, grid=None) -> pd.DataFrame:
     """Matrice booléenne uid × snapshot_ts : True = véhicule présent (donc
-    LIBRE) à ce passage. Les trous (False) sont des périodes loué/retiré."""
-    grid = np.sort(snap["snapshot_ts"].unique())
+    LIBRE) à ce passage. Les trous (False) sont des périodes loué/retiré.
+
+    grid : liste des passages de collecte. À fournir (via collection_grid())
+    pour être robuste ; sinon déduite des véhicules vus (OK en prod où chaque
+    passage a ~1000 véhicules, mais faux si un passage n'a aucun présent)."""
+    if grid is None:
+        grid = np.sort(snap["snapshot_ts"].unique())
     pres = (snap.assign(present=True)
                 .pivot_table(index="uid", columns="snapshot_ts",
-                             values="present", aggfunc="any")
-                .reindex(columns=grid)
-                .fillna(False)
+                             values="present", aggfunc="any", fill_value=False)
+                .reindex(columns=grid, fill_value=False)
                 .astype(bool))
     return pres
 
@@ -63,7 +79,8 @@ def presence_matrix(snap: pd.DataFrame) -> pd.DataFrame:
 # 2. ÉPISODES DE LOCATION  (le coeur du signal de demande)
 # --------------------------------------------------------------------------
 def rental_episodes(snap: pd.DataFrame,
-                    min_absence_snapshots: int = 1) -> pd.DataFrame:
+                    min_absence_snapshots: int = 1,
+                    grid=None) -> pd.DataFrame:
     """
     Un épisode = une plage où le véhicule DISPARAÎT du flux entre deux passages
     où il était présent (donc il est réapparu → on connaît le retour).
@@ -75,7 +92,7 @@ def rental_episodes(snap: pd.DataFrame,
     min_absence_snapshots : ignore les trous plus courts que N passages (filtre
     le bruit du plafond 1000 / hoquets de flux).
     """
-    pres = presence_matrix(snap)
+    pres = presence_matrix(snap, grid=grid)
     grid = list(pres.columns)
     # métadonnées par uid (dernier snapshot connu)
     meta = (snap.sort_values("snapshot_ts")
@@ -121,13 +138,13 @@ def rental_episodes(snap: pd.DataFrame,
 # --------------------------------------------------------------------------
 # 3. OCCUPATION / UTILISATION par véhicule
 # --------------------------------------------------------------------------
-def utilization_per_vehicle(snap: pd.DataFrame) -> pd.DataFrame:
+def utilization_per_vehicle(snap: pd.DataFrame, grid=None) -> pd.DataFrame:
     """Par véhicule : part des passages où il était ABSENT (loué), nb d'épisodes,
     prix. Occupation = temps loué / temps observé (proxy direct de la demande)."""
-    pres = presence_matrix(snap)
+    pres = presence_matrix(snap, grid=grid)
     n_obs = pres.shape[1]
     absent = (~pres).sum(axis=1)
-    ep = rental_episodes(snap)
+    ep = rental_episodes(snap, grid=grid)
     n_ep = (ep.groupby("uid").size() if not ep.empty
             else pd.Series(dtype=int)).rename("n_episodes")
 

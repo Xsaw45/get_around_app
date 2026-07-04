@@ -47,8 +47,10 @@ pip install -r requirements.txt
 
 ```powershell
 python ingest.py        # un passage : ~1000 véhicules -> getaround_gbfs.sqlite
-python features.py      # analyse (descriptif dès 1 passage ; demande dès 2+)
-python export_ml.py     # génère les datasets Parquet dans ./exports/
+python features.py      # analyse console (descriptif dès 1 passage ; demande dès 2+)
+python analyze.py       # rapport d'étude de marché (md + graphiques) dans ./exports/
+python export_ml.py     # datasets Parquet/CSV pour le ML dans ./exports/
+python tests/test_features.py   # vérifie le moteur temporel (6 tests)
 ```
 
 ## Planification (le cœur du projet)
@@ -98,6 +100,8 @@ Grande couronne (Meaux, Val d'Europe, 77…) : ajouter les slugs de villes dans
 - `gbfs.py` — client GBFS (lecture JSON, normalisation)
 - `ingest.py` — un passage de collecte (append-only)
 - `features.py` — moteur temporel (présence → locations, occupation, prix)
-- `export_ml.py` — datasets Parquet pour le ML
+- `analyze.py` — rapport d'étude de marché (markdown + graphiques PNG)
+- `export_ml.py` — datasets Parquet/CSV pour le ML
+- `tests/test_features.py` — tests du moteur temporel (python pur ou pytest)
 - `run.ps1` / `register_task.ps1` — planification Windows
 - `legacy/` — ancien scraper HTML (abandonné au profit du GBFS)
