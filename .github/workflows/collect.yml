@@ -1,0 +1,47 @@
+name: Collecte GBFS Getaround
+
+# Collecte automatique, indépendante de ton PC : GitHub exécute ce job et
+# committe les données dans le repo (le runner est jetable, seul le commit
+# persiste). Voir README > Planification.
+
+on:
+  schedule:
+    # toutes les 30 min (UTC). Note : le planificateur GitHub est "best effort",
+    # un passage peut être décalé/sauté en période de forte charge.
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}          # bouton "Run workflow" pour tester à la main
+
+# droit d'écrire dans le repo (pour committer les données)
+permissions:
+  contents: write
+
+# un seul passage à la fois : évite deux pushs concurrents
+concurrency:
+  group: collecte-gbfs
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ingest.py n'a AUCUNE dépendance (stdlib) -> pas de pip install
+      - name: Un passage de collecte
+        run: python ingest.py
+
+      - name: Committer les nouvelles données
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Aucune nouvelle donnée à committer."
+          else
+            git commit -m "data: passage $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git push
+          fi

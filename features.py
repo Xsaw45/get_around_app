@@ -24,19 +24,30 @@ Ce module ne fait AUCUN réseau : il ne lit que ce que ingest.py a stocké.
 """
 from __future__ import annotations
 import sqlite3
+import glob
 import pandas as pd
 import numpy as np
 
-from config import DB_PATH
+from config import DB_PATH, DATA_DIR
 
 
 # --------------------------------------------------------------------------
-# Chargement
+# Chargement — source canonique = data/*.csv (committé), repli SQLite local
 # --------------------------------------------------------------------------
+def _csv_partitions():
+    # partitions journalières AAAA-MM-JJ.csv (exclut runs.csv)
+    pattern = "[0-9][0-9][0-9][0-9]-*.csv"
+    return sorted(glob.glob(str(DATA_DIR / pattern)))
+
+
 def load_snapshots(db_path=DB_PATH) -> pd.DataFrame:
-    con = sqlite3.connect(db_path)
-    df = pd.read_sql("SELECT * FROM vehicle_snapshots", con)
-    con.close()
+    parts = _csv_partitions()
+    if parts:
+        df = pd.concat([pd.read_csv(p) for p in parts], ignore_index=True)
+    else:                                             # repli SQLite
+        con = sqlite3.connect(db_path)
+        df = pd.read_sql("SELECT * FROM vehicle_snapshots", con)
+        con.close()
     df["snapshot_ts"] = pd.to_datetime(df["snapshot_ts"])
     # clé d'identité stable : listing_id si dispo, sinon vehicle_id
     df["uid"] = df["listing_id"].fillna(df["vehicle_id"])
@@ -44,15 +55,19 @@ def load_snapshots(db_path=DB_PATH) -> pd.DataFrame:
 
 
 def collection_grid(db_path=DB_PATH):
-    """Liste autoritative des passages de collecte (depuis run_log).
+    """Liste autoritative des passages de collecte (depuis runs.csv / run_log).
 
     C'est la grille temporelle correcte : un véhicule ABSENT n'écrit aucune
     ligne, donc on ne peut pas déduire les passages des seuls véhicules vus.
     """
-    con = sqlite3.connect(db_path)
-    ts = pd.read_sql("SELECT DISTINCT snapshot_ts FROM run_log", con)
-    con.close()
-    return np.sort(pd.to_datetime(ts["snapshot_ts"]).values)
+    runs = DATA_DIR / "runs.csv"
+    if runs.exists():
+        ts = pd.read_csv(runs, usecols=["snapshot_ts"])["snapshot_ts"]
+    else:                                             # repli SQLite
+        con = sqlite3.connect(db_path)
+        ts = pd.read_sql("SELECT DISTINCT snapshot_ts FROM run_log", con)["snapshot_ts"]
+        con.close()
+    return np.sort(pd.to_datetime(ts.unique()))
 
 
 # --------------------------------------------------------------------------

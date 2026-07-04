@@ -56,27 +56,58 @@ python tests/test_features.py   # vérifie le moteur temporel (6 tests)
 ## Planification (le cœur du projet)
 
 La valeur vient de la **régularité**. Comme les voitures louées disparaissent du
-flux, il faut collecter **toutes les ~20 min** (un rythme quotidien raterait
-toutes les locations de quelques heures). L'agrégation au **jour** se fait à
-l'analyse, pas à la collecte.
+flux, il faut collecter souvent (un rythme quotidien raterait les locations de
+quelques heures). L'agrégation au **jour** se fait à l'analyse, pas à la collecte.
 
-Sur Windows, une fois :
+### Option A — GitHub Actions (recommandé, vraiment automatique)
 
-```powershell
-.\register_task.ps1     # enregistre une tâche planifiée toutes les 20 min
+Le collecteur tourne sur les serveurs GitHub, **PC éteint ou non** :
+`.github/workflows/collect.yml` s'exécute toutes les 30 min, lance `ingest.py`
+et **committe les données** dans le repo (le runner est jetable ⇒ seul le commit
+persiste). D'où le stockage en CSV (`data/`) plutôt qu'en SQLite : un binaire qui
+gonfle serait vite refusé par la limite de 100 Mo/fichier de GitHub.
+
+Pour l'activer : pousse le repo sur GitHub, va dans l'onglet **Actions**,
+active les workflows. C'est tout — il tourne ensuite tout seul. Bouton
+**Run workflow** pour un test immédiat.
+
+Notes :
+- Repo **public** → minutes Actions **gratuites illimitées**. Repo **privé** →
+  ~1440 min/mois à cette cadence (dans le quota gratuit de 2000).
+- Le planificateur GitHub est *best effort* : un passage peut être décalé de
+  quelques minutes en forte charge. Pour une cadence stricte, voir l'option B.
+
+### Option B — VM cloud 24/7 (cadence stricte)
+
+Sur une petite VM Linux (Oracle/Google free tier, ou VPS ~4 €/mois), cron :
+
+```cron
+*/20 * * * * cd /chemin/get_around_app && /usr/bin/python3 ingest.py
 ```
 
-La tâche appelle `run.ps1` (force l'UTF-8, journalise dans `run.log`). Le PC doit
-être allumé aux heures de passage ; pour une série sans trou, héberger sur une
-petite VM/serveur qui tourne 24/7 (le code y est identique).
+Puis `git add data/ && git commit && git push` en fin de script, ou analyse en
+place. Même code, sans le jitter de GitHub.
 
-## Schéma de données (`getaround_gbfs.sqlite`, append-only)
+### Option C — PC Windows (Planificateur de tâches)
 
-- `vehicle_snapshots` — 1 ligne / véhicule / passage : position, dispo, prix,
-  modèle, `listing_id` (clé stable), commune.
-- `vehicle_types` — référentiel modèle/année/motorisation.
-- `pricing_plans` — tarifs par plan, historisés à chaque passage.
-- `run_log` — trace de chaque passage.
+Simple mais **ne collecte que quand le PC est allumé** (trous sinon) :
+
+```powershell
+.\register_task.ps1     # tâche planifiée toutes les 20 min -> run.ps1
+```
+
+## Stockage des données (append-only)
+
+**Source canonique = `data/` (CSV, committé dans git)** — portable et compatible
+avec les runners jetables de GitHub Actions :
+
+- `data/AAAA-MM-JJ.csv` — 1 ligne / véhicule / passage : position, dispo, prix,
+  modèle, `listing_id` (clé stable), commune. Un fichier par jour (borné).
+- `data/runs.csv` — trace de chaque passage (grille temporelle autoritative).
+
+**Miroir local optionnel = `getaround_gbfs.sqlite`** (non committé) — pratique
+pour du SQL ad hoc ; contient en plus `vehicle_types` et `pricing_plans`.
+`features.py` lit `data/` en priorité, et retombe sur le SQLite sinon.
 
 ## Étendre le périmètre
 
@@ -103,5 +134,7 @@ Grande couronne (Meaux, Val d'Europe, 77…) : ajouter les slugs de villes dans
 - `analyze.py` — rapport d'étude de marché (markdown + graphiques PNG)
 - `export_ml.py` — datasets Parquet/CSV pour le ML
 - `tests/test_features.py` — tests du moteur temporel (python pur ou pytest)
-- `run.ps1` / `register_task.ps1` — planification Windows
+- `.github/workflows/collect.yml` — collecte automatique (GitHub Actions)
+- `run.ps1` / `register_task.ps1` — planification Windows (option C)
+- `data/` — données collectées (CSV, committé)
 - `legacy/` — ancien scraper HTML (abandonné au profit du GBFS)

@@ -1,4 +1,6 @@
-# Données collectées (grossissent en continu, ne pas versionner)
+# data/ EST versionné (source canonique, committé par GitHub Actions).
+
+# Miroir SQLite local et sorties d'analyse : NON versionnés
 *.sqlite
 *.sqlite-journal
 exports/

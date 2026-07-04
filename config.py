@@ -34,8 +34,12 @@ IDF_BBOX = dict(lat_min=48.10, lat_max=49.25, lon_min=1.40, lon_max=3.60)
 # --------------------------------------------------------------------------
 # Stockage
 # --------------------------------------------------------------------------
+# data/ = stockage CANONIQUE, committé dans git (CSV partitionné par jour).
+# Portable, léger, survit aux runners jetables de GitHub Actions.
+DATA_DIR = Path(__file__).parent / "data"
+# SQLite = miroir LOCAL optionnel (pratique pour du SQL ad hoc, non committé).
 DB_PATH = Path(__file__).parent / "getaround_gbfs.sqlite"
-EXPORT_DIR = Path(__file__).parent / "exports"       # datasets ML (parquet)
+EXPORT_DIR = Path(__file__).parent / "exports"       # datasets ML (parquet/csv)
 
 # --------------------------------------------------------------------------
 # HTTP

@@ -17,11 +17,22 @@ Tables (append-only) :
   run_log            : trace de chaque passage
 """
 from __future__ import annotations
+import csv
 import sqlite3
 import datetime as dt
 
-from config import DB_PATH, SYSTEMS, IDF_BBOX
+from config import DB_PATH, DATA_DIR, SYSTEMS, IDF_BBOX
 import gbfs
+
+# colonnes stockées par véhicule/passage (ordre canonique, réutilisé CSV+SQL)
+SNAPSHOT_COLS = [
+    "snapshot_ts", "system_id", "listing_id", "vehicle_id", "commune",
+    "lat", "lon", "is_reserved", "is_disabled", "current_range_meters",
+    "vehicle_type_id", "make", "model", "year", "propulsion",
+    "pricing_plan_id", "hourly_rate", "daily_rate", "rental_url",
+]
+RUNLOG_COLS = ["snapshot_ts", "system_id", "n_seen", "n_kept",
+               "n_reserved", "status", "note"]
 
 
 SCHEMA = """
@@ -92,9 +103,10 @@ def run_snapshot(con: sqlite3.Connection | None = None) -> str:
         try:
             rows = gbfs.collect_system(system)
         except Exception as e:                       # collecte d'un système KO
-            con.execute("INSERT INTO run_log VALUES(?,?,?,?,?,?,?)",
-                        (ts, system, 0, 0, 0, "error", str(e)[:300]))
+            runlog = (ts, system, 0, 0, 0, "error", str(e)[:300])
+            con.execute("INSERT INTO run_log VALUES(?,?,?,?,?,?,?)", runlog)
             con.commit()
+            _append_runlog_csv(runlog)
             print(f"[{system}] ERREUR : {e}")
             continue
 
@@ -109,13 +121,15 @@ def run_snapshot(con: sqlite3.Connection | None = None) -> str:
             r["snapshot_ts"] = ts
             kept.append(r)
 
-        _store_snapshots(con, kept)
+        _store_snapshots(con, kept)                    # sqlite (miroir local)
         _store_types(con, kept, ts)
         _store_pricing(con, system, ts)               # plans complets du système
+        _append_csv(kept, ts)                          # CSV canonique (committé)
         n_res = sum(r["is_reserved"] for r in kept)
-        con.execute("INSERT INTO run_log VALUES(?,?,?,?,?,?,?)",
-                    (ts, system, len(rows), len(kept), n_res, "ok", None))
+        runlog = (ts, system, len(rows), len(kept), n_res, "ok", None)
+        con.execute("INSERT INTO run_log VALUES(?,?,?,?,?,?,?)", runlog)
         con.commit()
+        _append_runlog_csv(runlog)
         total_kept += len(kept)
         print(f"[{system}] {len(rows)} vus -> {len(kept)} gardés (IDF, dédup), "
               f"{n_res} réservés")
@@ -124,6 +138,33 @@ def run_snapshot(con: sqlite3.Connection | None = None) -> str:
         con.close()
     print(f"Snapshot {ts} : {total_kept} véhicules stockés dans {DB_PATH.name}")
     return ts
+
+
+def _append_csv(rows, ts):
+    """Append les véhicules du passage dans data/AAAA-MM-JJ.csv (canonique)."""
+    if not rows:
+        return
+    DATA_DIR.mkdir(exist_ok=True)
+    path = DATA_DIR / f"{ts[:10]}.csv"               # partition par jour
+    new = not path.exists()
+    with open(path, "a", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=SNAPSHOT_COLS)
+        if new:
+            w.writeheader()
+        for r in rows:
+            w.writerow({c: r.get(c) for c in SNAPSHOT_COLS})
+
+
+def _append_runlog_csv(runlog):
+    """Append une ligne dans data/runs.csv (grille autoritative des passages)."""
+    DATA_DIR.mkdir(exist_ok=True)
+    path = DATA_DIR / "runs.csv"
+    new = not path.exists()
+    with open(path, "a", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        if new:
+            w.writerow(RUNLOG_COLS)
+        w.writerow(runlog)
 
 
 def _store_snapshots(con, rows):
