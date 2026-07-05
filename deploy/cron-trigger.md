@@ -12,6 +12,10 @@ les 20 min via l'API GitHub. **Aucun changement de code.**
 2. **Resource owner** : Xsaw45.
 3. **Repository access** : *Only select repositories* → **get_around_app**.
 4. **Permissions → Repository permissions → Actions** : **Read and write**.
+   ⚠️ Bien choisir **« Actions »** (décrite *« Workflows, workflow runs and
+   artifacts »*), **PAS** la permission **« Workflows »** (elle, sert à modifier
+   les fichiers de workflow, ce n'est pas ce qu'on veut). Au final le token doit
+   montrer : **Metadata (Read-only) + Actions (Read and write)**.
 5. Génère, **copie le token** (`github_pat_…`) — il ne se réaffiche plus.
 
 ## 2. Créer le cron sur cron-job.org
