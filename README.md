@@ -74,8 +74,11 @@ active les workflows. C'est tout — il tourne ensuite tout seul. Bouton
 Notes :
 - Repo **public** → minutes Actions **gratuites illimitées**. Repo **privé** →
   ~1440 min/mois à cette cadence (dans le quota gratuit de 2000).
-- Le planificateur GitHub est *best effort* : un passage peut être décalé de
-  quelques minutes en forte charge. Pour une cadence stricte, voir l'option B.
+- ⚠️ Le planificateur `schedule` de GitHub est **fortement bridé** (passages
+  sautés, trous de plusieurs heures observés). Pour une **cadence fiable de
+  20 min sans carte ni VM**, on déclenche le workflow via un cron externe gratuit
+  (cron-job.org) qui tape l'API GitHub : voir
+  **[`deploy/cron-trigger.md`](deploy/cron-trigger.md)**. Aucun changement de code.
 
 ### Option B — VM cloud 24/7 gratuite (cadence stricte, sans jitter)
 
