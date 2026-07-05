@@ -78,18 +78,66 @@ def segment_of(make, model) -> str:
     return "Autre"
 
 
-# coût d'acquisition médian estimé par segment (€) — À AJUSTER (Argus / ton marché)
-ACQUISITION_DEFAUT = {
-    "Utilitaire": 15000, "Citadine": 8000, "Berline": 12000, "SUV": 16000,
-    "Minibus": 22000, "Familiale": 14000, "Cabriolet": 16000, "Autre": 12000,
+# ---------------------------------------------------------------------------
+# COÛT D'ACQUISITION — estimation paramétrique (prix neuf × décote selon l'âge)
+# ---------------------------------------------------------------------------
+# L'Argus n'a pas d'API gratuite : on estime le prix d'occasion par
+# prix_neuf(modèle) × rétention(âge). C'est une APPROXIMATION transparente et
+# éditable, pas une cote officielle. Pour des cotes exactes -> source payante.
+
+# prix neuf indicatif (€) par mot-clé modèle (1re correspondance gagne)
+_NEW_PRICE_MODEL: list[tuple[tuple[str, ...], int]] = [
+    (("master", "boxer", "ducato", "jumper", "movano", "daily", "crafter",
+      "sprinter"), 40000),                                    # gros fourgons
+    (("trafic", "jumpy", "expert", "vivaro", "transporter", "transit",
+      "proace", "scudo", "talento", "vito"), 33000),          # fourgons moyens
+    (("kangoo", "berlingo", "partner", "combo", "doblo", "caddy", "dokker",
+      "nv200", "fiorino"), 23000),                            # ludospaces/petits utili
+    (("5008", "espace", "scenic", "scénic", "touran", "zafira", "lodgy",
+      "jogger"), 32000),                                      # familiales/monospaces
+    (("3008", "tiguan", "qashqai", "kadjar", "duster", "rav4", "tucson",
+      "koleos", "x3", "q5", "glc"), 30000),                   # SUV moyens
+    (("2008", "captur", "juke", "t-roc", "t-cross", "mokka", "puma", "arona",
+      "crossland", "c-hr", "kona", "x1", "q3", "gla"), 25000),# SUV compacts
+    (("308", "megane", "mégane", "golf", "astra", "focus", "leon", "octavia",
+      "civic", "a3", "corolla"), 27000),                      # compactes
+    (("508", "passat", "mondeo", "insignia", "serie 3", "a4", "classe"),
+     35000),                                                  # berlines
+    (("208", "clio", "c3", "polo", "corsa", "fiesta", "ibiza", "yaris",
+      "a1", "ds 3", "ds3"), 19000),                           # citadines
+    (("108", "twingo", "aygo", "c1", "500", "panda", "up", "micra", "i10",
+      "fabia", "sandero", "citigo", "celerio", "ypsilon", "punto", "fortwo",
+      "spring", "zoe"), 15000),                               # mini-citadines
+]
+# prix neuf par défaut par segment si le modèle n'est pas listé
+_NEW_PRICE_SEG = {
+    "Utilitaire": 30000, "Citadine": 18000, "Berline": 30000, "SUV": 27000,
+    "Minibus": 42000, "Familiale": 30000, "Cabriolet": 35000, "Autre": 22000,
 }
+
+
+def _new_price(make, model, segment) -> int:
+    m = f"{make or ''} {model or ''}".lower()
+    for keys, price in _NEW_PRICE_MODEL:
+        if any(k in m for k in keys):
+            return price
+    return _NEW_PRICE_SEG.get(segment, 22000)
+
+
+def estimate_acquisition(make, model, year, segment, ref_year: int) -> float:
+    """Prix d'occasion estimé = prix_neuf × rétention(âge), plancher 2000 €.
+
+    Rétention : -20 % la 1re année, puis -13 %/an (courbe de décote usuelle)."""
+    new = _new_price(make, model, segment)
+    age = 8 if year is None or pd.isna(year) else max(0, ref_year - int(year))
+    retention = 1.0 if age == 0 else 0.80 * (0.87 ** (age - 1))
+    return round(max(2000.0, new * max(retention, 0.12)), 0)
 
 
 # ---------------------------------------------------------------------------
 # 2. FEATURES PAR VÉHICULE
 # ---------------------------------------------------------------------------
 def build_features(snap: pd.DataFrame | None = None,
-                   acquisition_cost: dict | None = None,
                    min_passages: int = 3) -> pd.DataFrame:
     """Une ligne par véhicule : identité, segment, prix, occupation, revenu, ROI.
 
@@ -97,18 +145,22 @@ def build_features(snap: pd.DataFrame | None = None,
     if snap is None:
         snap = load_snapshots()
     grid = collection_grid()
-    acq = acquisition_cost or ACQUISITION_DEFAUT
+    ref_year = int(pd.to_datetime(snap["snapshot_ts"]).max().year)
 
     util = utilization_per_vehicle(snap, grid=grid)         # occupation + épisodes
-    util = util[util["n_passages"] >= min_passages].copy()
+    util = util[(util["n_passages"] >= min_passages)
+                & util["daily_rate"].notna()].copy()        # écarte prix/modèle manquants
 
-    # segment + département (75/92/93/94/77…) via longitude approx
     util["segment"] = [segment_of(mk, md)
                        for mk, md in zip(util["make"], util["model"])]
-    # revenu réalisé estimé
+    # coût d'achat estimé par véhicule (prix neuf modèle × décote selon l'âge)
+    util["cout_acquisition"] = [
+        estimate_acquisition(mk, md, yr, seg, ref_year)
+        for mk, md, yr, seg in zip(util["make"], util["model"],
+                                   util["year"], util["segment"])]
+    # revenu réalisé estimé + rentabilité du capital
     util["revenu_jour"] = util["taux_occupation"] * util["daily_rate"]
     util["revenu_annuel"] = util["revenu_jour"] * 365.0
-    util["cout_acquisition"] = util["segment"].map(acq)
     util["roi_annuel"] = util["revenu_annuel"] / util["cout_acquisition"]
     return util
 
