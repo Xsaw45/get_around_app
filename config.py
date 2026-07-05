@@ -17,12 +17,13 @@ from pathlib import Path
 GBFS_MANIFEST = "https://fr.getaround.com/gbfs/manifest?country_code=FR"
 GBFS_SYSTEM_TMPL = "https://fr.getaround.com/gbfs/v3/{system}/gbfs"
 
-# Systèmes à collecter. `getaround_paris` couvre Paris + petite couronne
-# (69 communes, plafonné à 1000 véhicules par le flux). Pour étendre à la
-# grande couronne (Meaux, Val d'Europe, 77…), ajoute les slugs de ces villes :
-#   SYSTEMS = ["paris", "meaux", "torcy", "chessy"]
-# Les doublons entre systèmes sont dédupliqués par listing_id à l'ingestion.
-SYSTEMS = ["paris"]
+# Systèmes à collecter. `paris` couvre Paris + petite couronne (69 communes,
+# plafonné à 1000 véhicules). Les autres étendent à la grande couronne EST (77) :
+# Meaux + Val d'Europe / Marne-la-Vallée (Chessy, Serris, Bussy, Torcy).
+# Les doublons entre systèmes sont dédupliqués par listing_id à l'ingestion, et
+# le filtre IDF_BBOX écarte le hors-zone. Ajoute d'autres slugs de villes au
+# besoin (3752 systèmes existent en France, voir le manifeste GBFS).
+SYSTEMS = ["paris", "meaux", "chessy", "serris", "torcy"]
 
 # --------------------------------------------------------------------------
 # Filtre géographique — bounding box Île-de-France (sécurité anti hors-zone)
