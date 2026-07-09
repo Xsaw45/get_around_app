@@ -6,17 +6,20 @@ Transforme les snapshots en une TABLE DE FEATURES par véhicule, puis en
 classements par segment / modèle. C'est la couche qui répond à « quelles voitures
 sont les plus rentables et efficaces ».
 
-Trois indicateurs, du plus brut au plus décisionnel :
+Indicateurs, du plus brut au plus décisionnel :
   - taux_occupation      : demande pure (part du temps où la voiture est louée)
   - revenu_jour / an     : occupation × prix (efficacité de génération de CA)
-  - roi_annuel           : revenu annuel / coût d'acquisition (rentabilité du capital)
+  - roi_annuel           : revenu annuel / coût d'acquisition (rentabilité brute)
+  - roi_net              : après entretien (via reliability.py) — rentabilité nette
+
+Le coût d'acquisition n'est PAS dans le GBFS : on l'ESTIME par véhicule
+(prix neuf du modèle × décote selon l'âge, cf. estimate_acquisition).
+La fiabilité et l'entretien sont ajoutés par reliability.enrich() ; le calcul
+buy/sell complet (avec décote fine) vit dans tco.py.
 
 ⚠️ Tant que peu de passages sont accumulés, l'occupation (donc revenu/ROI) est
 BRUITÉE. Le code est correct dès maintenant ; les CONCLUSIONS se fiabilisent avec
 les jours de collecte. `min_passages` filtre les véhicules trop peu observés.
-
-Le coût d'acquisition n'est PAS dans le GBFS : on l'estime par segment
-(ACQUISITION_DEFAUT, à ajuster avec tes vraies valeurs Argus).
 """
 from __future__ import annotations
 import pandas as pd
