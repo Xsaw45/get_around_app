@@ -178,6 +178,7 @@ def utilization_per_vehicle(snap: pd.DataFrame, grid=None) -> pd.DataFrame:
     meta = (snap.sort_values("snapshot_ts").groupby("uid")
                 .agg(commune=("commune", "last"), make=("make", "last"),
                      model=("model", "last"), year=("year", "last"),
+                     propulsion=("propulsion", "last"),
                      daily_rate=("daily_rate", "last")))
     out = meta.join(pd.DataFrame({"n_passages": n_obs,
                                   "n_absent": absent})).join(n_ep)

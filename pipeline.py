@@ -24,6 +24,7 @@ import numpy as np
 
 from features import (load_snapshots, collection_grid,
                       utilization_per_vehicle, rental_episodes)
+import reliability
 
 
 # ---------------------------------------------------------------------------
@@ -162,6 +163,8 @@ def build_features(snap: pd.DataFrame | None = None,
     util["revenu_jour"] = util["taux_occupation"] * util["daily_rate"]
     util["revenu_annuel"] = util["revenu_jour"] * 365.0
     util["roi_annuel"] = util["revenu_annuel"] / util["cout_acquisition"]
+    # enrichissement fiabilité + entretien -> rentabilité NETTE
+    util = reliability.enrich(util, ref_year)
     return util
 
 
@@ -180,11 +183,14 @@ def rank_by(features: pd.DataFrame, by: str = "segment",
                 prix_jour_moy=("daily_rate", "mean"),
                 occupation_moy=("taux_occupation", "mean"),
                 revenu_annuel_moy=("revenu_annuel", "mean"),
+                entretien_moy=("entretien_annuel", "mean"),
+                fiabilite=("fiabilite_score", "mean"),
                 cout_acq=("cout_acquisition", "median"),
-                roi_annuel=("roi_annuel", "mean"))
+                roi_annuel=("roi_annuel", "mean"),
+                roi_net=("roi_net", "mean"))
            .reset_index())
     agg = agg[agg["n_vehicules"] >= min_n]
-    return agg.sort_values("roi_annuel", ascending=False).round(3)
+    return agg.sort_values("roi_net", ascending=False).round(3)
 
 
 # ---------------------------------------------------------------------------
