@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-12 10:44 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
+> _Régénéré le 2026-07-12 13:58 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-07-12 10:31:24
-- **Passages collectés** : 744
+- **Passage analysé** : 2026-07-12 13:45:58
+- **Passages collectés** : 759
 - **Flotte** : 1233 véhicules sur 105 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -34,14 +34,14 @@
 | Toyota | 56 |
 | Fiat | 45 |
 | Opel | 34 |
-| Volkswagen | 33 |
+| Volkswagen | 32 |
 | Dacia | 24 |
 
 ## Motorisation
 
 | Type | Véhicules |
 |---|---|
-| combustion | 605 |
+| combustion | 604 |
 | combustion_diesel | 538 |
 | hybrid | 75 |
 | electric | 15 |
@@ -49,4 +49,4 @@
 ## Demande mesurée
 - Occupation moyenne : 14.2%
 - Véhicules avec ≥1 location détectée : 137 / 1433
-- Véhicules à prix variable (pricing dynamique) : 61
+- Véhicules à prix variable (pricing dynamique) : 62
