@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-13 19:51 · état collecte : 🟢 à jour (dernier passage il y a 0.1 h)_
+> _Régénéré le 2026-07-13 22:12 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-07-13 19:46:08
-- **Passages collectés** : 892
+- **Passage analysé** : 2026-07-13 22:01:44
+- **Passages collectés** : 903
 - **Flotte** : 1233 véhicules sur 103 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -13,7 +13,7 @@
 
 | Commune | Véhicules |
 |---|---|
-| paris | 558 |
+| paris | 557 |
 | boulogne-billancourt | 36 |
 | montreuil | 27 |
 | noisy-le-grand | 24 |
