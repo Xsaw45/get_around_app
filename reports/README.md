@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-19 10:45 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
+> _Régénéré le 2026-07-19 13:56 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-07-19 10:32:21
-- **Passages collectés** : 1502
+- **Passage analysé** : 2026-07-19 13:46:40
+- **Passages collectés** : 1518
 - **Flotte** : 1234 véhicules sur 103 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -28,25 +28,25 @@
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 522 |
-| Peugeot | 278 |
+| Renault | 519 |
+| Peugeot | 279 |
 | Citroen | 181 |
 | Toyota | 58 |
-| Fiat | 45 |
+| Fiat | 44 |
 | Opel | 37 |
-| Volkswagen | 32 |
+| Volkswagen | 31 |
 | Dacia | 21 |
 
 ## Motorisation
 
 | Type | Véhicules |
 |---|---|
-| combustion | 595 |
-| combustion_diesel | 544 |
+| combustion | 593 |
+| combustion_diesel | 542 |
 | hybrid | 77 |
 | electric | 17 |
 
 ## Demande mesurée
 - Occupation moyenne : 19.1%
-- Véhicules avec ≥1 location détectée : 252 / 1522
+- Véhicules avec ≥1 location détectée : 254 / 1522
 - Véhicules à prix variable (pricing dynamique) : 128
