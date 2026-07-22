@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-22 14:25 · état collecte : 🟢 à jour (dernier passage il y a 0.1 h)_
+> _Régénéré le 2026-07-22 16:51 · état collecte : 🟢 à jour (dernier passage il y a 0.1 h)_
 
-- **Passage analysé** : 2026-07-22 14:17:26
-- **Passages collectés** : 1834
+- **Passage analysé** : 2026-07-22 16:47:28
+- **Passages collectés** : 1844
 - **Flotte** : 1236 véhicules sur 104 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -15,7 +15,7 @@
 |---|---|
 | paris | 561 |
 | boulogne-billancourt | 35 |
-| montreuil | 27 |
+| montreuil | 28 |
 | champs-sur-marne | 23 |
 | noisy-le-grand | 23 |
 | chessy | 18 |
@@ -49,4 +49,4 @@
 ## Demande mesurée
 - Occupation moyenne : 21.3%
 - Véhicules avec ≥1 location détectée : 311 / 1565
-- Véhicules à prix variable (pricing dynamique) : 149
+- Véhicules à prix variable (pricing dynamique) : 150
