@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-07-26 14:01 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
+> _Régénéré le 2026-07-26 16:17 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-07-26 13:47:50
-- **Passages collectés** : 2249
+- **Passage analysé** : 2026-07-26 16:03:04
+- **Passages collectés** : 2259
 - **Flotte** : 1238 véhicules sur 105 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -20,7 +20,7 @@
 | clichy | 22 |
 | champs-sur-marne | 22 |
 | chessy | 18 |
-| rosny-sous-bois | 16 |
+| rosny-sous-bois | 15 |
 | pantin | 15 |
 | bry-sur-marne | 15 |
 
@@ -28,9 +28,9 @@
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 516 |
+| Renault | 517 |
 | Peugeot | 276 |
-| Citroen | 187 |
+| Citroen | 188 |
 | Toyota | 64 |
 | Fiat | 46 |
 | Volkswagen | 31 |
@@ -42,11 +42,11 @@
 | Type | Véhicules |
 |---|---|
 | combustion | 588 |
-| combustion_diesel | 549 |
+| combustion_diesel | 551 |
 | hybrid | 78 |
 | electric | 15 |
 
 ## Demande mesurée
-- Occupation moyenne : 22.9%
-- Véhicules avec ≥1 location détectée : 367 / 1600
-- Véhicules à prix variable (pricing dynamique) : 161
+- Occupation moyenne : 23.0%
+- Véhicules avec ≥1 location détectée : 367 / 1601
+- Véhicules à prix variable (pricing dynamique) : 162
