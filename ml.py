@@ -108,6 +108,9 @@ def evaluate(X, y, df):
 # 4. Interprétation : importance + dépendances partielles
 # ---------------------------------------------------------------------------
 def interpret(X, y):
+    """Fit + importance + dépendances partielles. Renvoie (modèle, résultats)
+    où `résultats` est un dict JSON-ready (réutilisé par webapp/data.py) —
+    les mêmes calculs alimentent l'affichage console et l'API."""
     hgb = _pipe(HistGradientBoostingRegressor(max_depth=4, learning_rate=0.08,
                                              max_iter=300, l2_regularization=1.0,
                                              random_state=0)).fit(X, y)
@@ -116,27 +119,54 @@ def interpret(X, y):
     imp = permutation_importance(hgb, X, y, n_repeats=10, random_state=0,
                                  scoring="neg_mean_absolute_error")
     order = np.argsort(imp.importances_mean)[::-1]
-    for i in order:
-        print(f"  {(CAT+NUM)[i]:18} {imp.importances_mean[i]:+.4f}")
+    importance = [{"feature": (CAT + NUM)[i], "value": float(imp.importances_mean[i])}
+                  for i in order]
+    for row in importance:
+        print(f"  {row['feature']:18} {row['value']:+.4f}")
 
     print("\n=== Dépendances partielles (effet moyen sur l'occupation) ===")
+    partial_dep = {}
     for feat in ["daily_rate", "age", "densite_segment"]:
         pd_res = partial_dependence(hgb, X, [feat], grid_resolution=6)
         xs = pd_res["grid_values"][0]
         ys = pd_res["average"][0]
+        partial_dep[feat] = [{"x": float(x), "y": float(v)} for x, v in zip(xs, ys)]
         pts = " | ".join(f"{x:.0f}->{v*100:.1f}%" for x, v in zip(xs, ys))
         print(f"  {feat:16}: {pts}")
 
     print("\n=== Effet du prix par segment (occupation prédite) ===")
     base = X.median(numeric_only=True)
+    price_effect = {}
     for seg in ["Citadine", "SUV", "Utilitaire"]:
         row = {**{c: X[c].mode()[0] for c in CAT}, **base.to_dict(), "segment": seg}
-        line = []
+        line, points = [], []
         for prix in [35, 50, 65, 80, 100]:
             r = pd.DataFrame([{**row, "daily_rate": prix}])[CAT + NUM]
-            line.append(f"{prix}€->{float(np.clip(hgb.predict(r),0,1))*100:.0f}%")
+            occ = float(np.clip(hgb.predict(r), 0, 1)[0])
+            points.append({"price": prix, "occupation": occ})
+            line.append(f"{prix}€->{occ*100:.0f}%")
+        price_effect[seg] = points
         print(f"  {seg:12}: " + "  ".join(line))
-    return hgb
+
+    results = {"importance": importance, "partial_dependence": partial_dep,
+              "price_effect": price_effect}
+    return hgb, results
+
+
+def run_full(min_passages: int = 3) -> dict:
+    """Enchaîne prepare/evaluate/interpret et renvoie un dict JSON-ready
+    (perf CV + importance + dépendances partielles + effet prix) pour le
+    dashboard web (webapp/data.py)."""
+    df, X, y = prepare(min_passages=min_passages)
+    perf = evaluate(X, y, df)
+    _, insights = interpret(X, y)
+    return {
+        "n_vehicules": len(X),
+        "occupation_moyenne": float(y.mean()),
+        "performance": {k: {"mae": float(np.mean(v["mae"])), "r2": float(np.mean(v["r2"]))}
+                        for k, v in perf.items()},
+        **insights,
+    }
 
 
 def main():

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getaround IDF — dashboard</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Getaround IDF — dashboard</h1>
+    <span id="collector-badge" class="badge"><span class="dot" id="collector-dot"></span><span id="collector-label">chargement…</span></span>
+  </header>
+
+  <section class="card">
+    <h2>Pipeline</h2>
+    <p class="sub">Collecte → rapport marché → scoring rentabilité → export ML → modèle de demande. Ne touche jamais à git (aucun commit/push).</p>
+    <div class="run-row">
+      <button id="run-btn">Lancer le pipeline</button>
+      <ul class="steps" id="steps"></ul>
+    </div>
+    <pre id="log"></pre>
+  </section>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <h3 class="section">Marché</h3>
+  <div class="grid">
+    <div class="card"><h2>Véhicules par commune (top 12)</h2><canvas id="chart-communes" height="220"></canvas></div>
+    <div class="card"><h2>Distribution du prix / jour</h2><canvas id="chart-prix" height="220"></canvas></div>
+    <div class="card"><h2>Véhicules par marque (top 10)</h2><canvas id="chart-marques" height="220"></canvas></div>
+    <div class="card"><h2>Motorisation</h2><canvas id="chart-motorisation" height="220"></canvas></div>
+  </div>
+
+  <h3 class="section">Rentabilité</h3>
+  <div class="grid">
+    <div class="card"><h2>ROI net par segment</h2><canvas id="chart-roi-segment" height="220"></canvas></div>
+    <div class="card"><h2>Occupation moyenne par segment</h2><canvas id="chart-occupation-segment" height="220"></canvas></div>
+    <div class="card" style="grid-column: 1 / -1;"><h2>Top modèles par ROI net</h2><canvas id="chart-top-modeles" height="200"></canvas></div>
+  </div>
+
+  <h3 class="section">Modèle de demande (ML)</h3>
+  <div class="grid" id="ml-section">
+    <div class="card"><h2>Importance des variables</h2><canvas id="chart-ml-importance" height="220"></canvas></div>
+    <div class="card"><h2>Effet du prix sur l'occupation (par segment)</h2><canvas id="chart-price-effect" height="220"></canvas></div>
+    <div class="card"><h2>Occupation vs prix / jour</h2><canvas id="chart-pdp-price" height="180"></canvas></div>
+    <div class="card"><h2>Occupation vs âge du véhicule</h2><canvas id="chart-pdp-age" height="180"></canvas></div>
+  </div>
+
+  <h3 class="section">Activité de collecte</h3>
+  <div class="card"><h2>Passages par jour</h2><canvas id="chart-activity" height="180"></canvas></div>
+
+  <h3 class="section">Simulateur — et si j'achetais ce véhicule ici ?</h3>
+  <div class="card">
+    <p class="sub">Clique (ou fais glisser le repère) sur la carte pour choisir un emplacement, renseigne le véhicule visé, et estime la rentabilité à partir des comparables mesurés dans le rayon choisi. Les points colorés sont la flotte actuelle (couleur = segment).</p>
+    <div class="sim-layout">
+      <div id="sim-map"></div>
+      <form id="sim-form" class="sim-form">
+        <label>Marque<input type="text" id="sim-make" value="Toyota" required></label>
+        <label>Modèle<input type="text" id="sim-model" value="Yaris" required></label>
+        <label>Motorisation
+          <select id="sim-propulsion">
+            <option value="hybrid" selected>Hybride</option>
+            <option value="combustion">Essence</option>
+            <option value="combustion_diesel">Diesel</option>
+            <option value="electric">Électrique</option>
+          </select>
+        </label>
+        <label>Rayon comparables (km)<input type="number" id="sim-radius" value="1.2" step="0.1" min="0.3" max="5"></label>
+        <label>Prix / jour visé (€, optionnel)<input type="number" id="sim-price" placeholder="auto (moyenne locale)"></label>
+        <div class="sim-pos">Position : <span id="sim-pos-label">48.8467, 2.3958 (Nation, défaut)</span></div>
+        <div class="sim-buttons">
+          <button type="submit" id="sim-submit">Estimer la rentabilité</button>
+          <button type="button" id="sim-best-btn" class="btn-secondary">Trouver le meilleur véhicule ici</button>
+        </div>
+      </form>
+    </div>
+    <div id="sim-result"></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4" defer></script>
+<script src="/static/app.js" defer></script>
+</body>
+</html>
