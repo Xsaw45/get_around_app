@@ -189,6 +189,12 @@ async function loadML() {
 
   upsertChart("chart-pdp-price", lineConfig(ml.partial_dependence.daily_rate, "€ / jour"));
   upsertChart("chart-pdp-age", lineConfig(ml.partial_dependence.age, "âge (ans)"));
+  if (ml.partial_dependence.densite_yespark) {
+    upsertChart("chart-pdp-yespark", lineConfig(ml.partial_dependence.densite_yespark, "parkings YesPark (rayon 1 km)"));
+  }
+  if (ml.partial_dependence.densite_transport) {
+    upsertChart("chart-pdp-transport", lineConfig(ml.partial_dependence.densite_transport, "arrêts transport lourd (rayon 500 m)"));
+  }
 }
 
 async function loadActivity() {

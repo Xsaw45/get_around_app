@@ -179,7 +179,8 @@ def utilization_per_vehicle(snap: pd.DataFrame, grid=None) -> pd.DataFrame:
                 .agg(commune=("commune", "last"), make=("make", "last"),
                      model=("model", "last"), year=("year", "last"),
                      propulsion=("propulsion", "last"),
-                     daily_rate=("daily_rate", "last")))
+                     daily_rate=("daily_rate", "last"),
+                     lat=("lat", "last"), lon=("lon", "last")))
     out = meta.join(pd.DataFrame({"n_passages": n_obs,
                                   "n_absent": absent})).join(n_ep)
     out["n_episodes"] = out["n_episodes"].fillna(0).astype(int)

@@ -16,8 +16,22 @@ Démarche (cf. la discussion méthodo) :
 Cible y = taux_occupation (0-1). Une ligne = un véhicule (agrégé sur tous les
 passages), donc pas de fuite temporelle : KFold standard suffit.
 
-Feature maison : `densite_segment` = nb de véhicules du même segment dans la même
-commune → capture la SURREPRÉSENTATION (l'hypothèse Kangoo Express).
+Features de densité, toutes calculées par RAYON GPS (KD-tree) plutôt que par
+commune : `commune` est un bucket administratif grossier (tout Paris
+intramuros est UNE SEULE commune dans les données — biais découvert en
+construisant le simulateur d'investissement, cf. webapp/simulate.py) qui
+sous-estime la variation réelle à l'intérieur d'une même ville.
+  - `densite_commune` / `densite_segment` = nb de véhicules (tous / même
+    segment) dans un rayon de 1 km → capture la SURREPRÉSENTATION locale
+    (l'hypothèse Kangoo Express), à l'échelle du quartier plutôt que de la ville.
+  - `densite_yespark` = nb de parkings YesPark (location de place au mois)
+    dans un rayon de 1 km → proxy de densité de stationnement privé à
+    proximité (cf. yespark.py).
+  - `densite_transport` = nb d'arrêts de transport LOURD (métro/RER/tram/train,
+    hors bus) dans un rayon de 500 m → accessibilité en transport en commun
+    (cf. idfm.py).
+Ces trois dernières sont optionnelles : restent à 0 partout tant que le
+fichier `data/*.csv` correspondant n'a pas été généré (pas de dépendance dure).
 
 ⚠️ Données encore modestes (~1300 véhicules, occupation en cours de stabilisation).
 Le but ici est la MÉTHODE + le signal directionnel, pas des coefficients définitifs.
@@ -35,11 +49,96 @@ from sklearn.model_selection import KFold
 from sklearn.inspection import permutation_importance, partial_dependence
 from sklearn.metrics import mean_absolute_error, r2_score
 
+from config import DATA_DIR
 from features import load_snapshots
 from pipeline import build_features
 
 CAT = ["segment", "propulsion", "make"]
-NUM = ["age", "daily_rate", "fiabilite_score", "densite_commune", "densite_segment"]
+NUM = ["age", "daily_rate", "fiabilite_score", "densite_commune", "densite_segment",
+      "densite_yespark", "densite_transport"]
+
+COMPETITION_RADIUS_KM = 1.0
+YESPARK_RADIUS_KM = 1.0
+TRANSIT_RADIUS_KM = 0.5                              # distance de marche raisonnable
+
+
+def _project_xy(lat: pd.Series, lon: pd.Series, lat0: float) -> np.ndarray:
+    """Projection équirectangulaire approx degrés -> km (précision suffisante
+    à l'échelle IDF, cf. même approche dans webapp/simulate.py)."""
+    km_lat, km_lon = 111.0, 111.0 * np.cos(np.radians(lat0))
+    return np.column_stack([lon.fillna(0).to_numpy() * km_lon,
+                            lat.fillna(0).to_numpy() * km_lat])
+
+
+def _density_from_points(df: pd.DataFrame, points_lat: pd.Series, points_lon: pd.Series,
+                         radius_km: float) -> pd.Series:
+    """Nb de points externes (points_lat/lon) dans un rayon (km) de chaque
+    véhicule de df (colonnes lat/lon)."""
+    zeros = pd.Series(0, index=df.index, dtype=int)
+    if "lat" not in df.columns or df[["lat", "lon"]].dropna().empty or len(points_lat) == 0:
+        return zeros
+    from scipy.spatial import cKDTree
+    lat0 = df["lat"].dropna().mean()
+    veh_xy = _project_xy(df["lat"], df["lon"], lat0)
+    pts_xy = _project_xy(points_lat.reset_index(drop=True), points_lon.reset_index(drop=True), lat0)
+    counts = pd.Series(cKDTree(pts_xy).query_ball_point(veh_xy, r=radius_km, return_length=True),
+                       index=df.index)
+    counts[df["lat"].isna() | df["lon"].isna()] = 0
+    return counts.astype(int)
+
+
+def _yespark_density(df: pd.DataFrame, radius_km: float = YESPARK_RADIUS_KM) -> pd.Series:
+    """Nombre de parkings YesPark dans un rayon (km) de chaque véhicule (voir
+    yespark.py). Renvoie 0 partout si data/yespark_parkings.csv n'existe pas
+    encore — feature optionnelle, pas de dépendance dure."""
+    path = DATA_DIR / "yespark_parkings.csv"
+    if not path.exists():
+        return pd.Series(0, index=df.index, dtype=int)
+    yp = pd.read_csv(path).dropna(subset=["lat", "lon"])
+    return _density_from_points(df, yp["lat"], yp["lon"], radius_km)
+
+
+def _transit_density(df: pd.DataFrame, radius_km: float = TRANSIT_RADIUS_KM) -> pd.Series:
+    """Nombre d'arrêts de transport lourd dans un rayon (km) de chaque
+    véhicule (voir idfm.py). Renvoie 0 partout si data/idfm_arrets.csv
+    n'existe pas encore — feature optionnelle, pas de dépendance dure."""
+    path = DATA_DIR / "idfm_arrets.csv"
+    if not path.exists():
+        return pd.Series(0, index=df.index, dtype=int)
+    st = pd.read_csv(path).dropna(subset=["lat", "lon"])
+    return _density_from_points(df, st["lat"], st["lon"], radius_km)
+
+
+def _local_densities(df: pd.DataFrame,
+                     radius_km: float = COMPETITION_RADIUS_KM) -> tuple[pd.Series, pd.Series]:
+    """Densité RÉELLE (rayon GPS) de véhicules à proximité — remplace l'ancien
+    calcul par commune (bucket administratif grossier). Renvoie
+    (densite_commune, densite_segment) : nb de véhicules dans le rayon, tous
+    segments confondus / du même segment (hors le véhicule lui-même)."""
+    dens_all = pd.Series(0, index=df.index, dtype=int)
+    dens_seg = pd.Series(0, index=df.index, dtype=int)
+    if "lat" not in df.columns:
+        return dens_all, dens_seg
+    valid = df[["lat", "lon"]].notna().all(axis=1)
+    if valid.sum() < 2:
+        return dens_all, dens_seg
+
+    from scipy.spatial import cKDTree
+    lat0 = df.loc[valid, "lat"].mean()
+    xy = _project_xy(df["lat"], df["lon"], lat0)
+
+    pos_valid = np.flatnonzero(valid.to_numpy())
+    tree_all = cKDTree(xy[pos_valid])
+    counts_all = tree_all.query_ball_point(xy[pos_valid], r=radius_km, return_length=True)
+    dens_all.iloc[pos_valid] = counts_all - 1            # exclut soi-même
+
+    for _, sub in df[valid].groupby("segment"):
+        pos = df.index.get_indexer(sub.index)
+        tree_seg = cKDTree(xy[pos])
+        counts_seg = tree_seg.query_ball_point(xy[pos], r=radius_km, return_length=True)
+        dens_seg.iloc[pos] = counts_seg - 1
+
+    return dens_all, dens_seg
 
 
 # ---------------------------------------------------------------------------
@@ -49,9 +148,10 @@ def prepare(min_passages: int = 3):
     feats = build_features(load_snapshots(), min_passages=min_passages)
     df = feats.copy()
     df["make"] = df["make"].fillna("?")
-    # feature d'offre locale (concurrence) : nb de véhicules dans la commune
-    df["densite_commune"] = df.groupby("commune")["uid"].transform("size")
-    df["densite_segment"] = df.groupby(["commune", "segment"])["uid"].transform("size")
+    # feature d'offre locale (concurrence), rayon GPS réel (voir _local_densities)
+    df["densite_commune"], df["densite_segment"] = _local_densities(df)
+    df["densite_yespark"] = _yespark_density(df).to_numpy()
+    df["densite_transport"] = _transit_density(df).to_numpy()
     df = df.dropna(subset=["daily_rate", "age", "taux_occupation"])
     for c in NUM:                                    # PDP exige du float
         df[c] = df[c].astype(float)
@@ -126,7 +226,7 @@ def interpret(X, y):
 
     print("\n=== Dépendances partielles (effet moyen sur l'occupation) ===")
     partial_dep = {}
-    for feat in ["daily_rate", "age", "densite_segment"]:
+    for feat in ["daily_rate", "age", "densite_segment", "densite_yespark", "densite_transport"]:
         pd_res = partial_dependence(hgb, X, [feat], grid_resolution=6)
         xs = pd_res["grid_values"][0]
         ys = pd_res["average"][0]
