@@ -1,10 +1,10 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-08-10 02:40 · état collecte : 🟢 à jour (dernier passage il y a 0.3 h)_
+> _Régénéré le 2026-08-10 05:00 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-08-10 02:20:07
-- **Passages collectés** : 3346
-- **Flotte** : 1239 véhicules sur 102 communes
+- **Passage analysé** : 2026-08-10 04:50:03
+- **Passages collectés** : 3356
+- **Flotte** : 1240 véhicules sur 102 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
 ![Vue d'ensemble](overview.png)
@@ -21,7 +21,7 @@
 | champs-sur-marne | 23 |
 | pantin | 18 |
 | bois-colombes | 18 |
-| chessy | 17 |
+| chessy | 18 |
 | saint-ouen-sur-seine | 16 |
 
 ## Parc par marque (top 8)
@@ -29,7 +29,7 @@
 | Marque | Véhicules |
 |---|---|
 | Renault | 520 |
-| Peugeot | 270 |
+| Peugeot | 271 |
 | Citroen | 197 |
 | Toyota | 61 |
 | Fiat | 47 |
@@ -42,11 +42,11 @@
 | Type | Véhicules |
 |---|---|
 | combustion_diesel | 575 |
-| combustion | 571 |
+| combustion | 572 |
 | hybrid | 73 |
 | electric | 18 |
 
 ## Demande mesurée
 - Occupation moyenne : 29.5%
-- Véhicules avec ≥1 location détectée : 532 / 1751
+- Véhicules avec ≥1 location détectée : 532 / 1752
 - Véhicules à prix variable (pricing dynamique) : 245
