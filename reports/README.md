@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-08-17 13:15 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
+> _Régénéré le 2026-08-17 15:48 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-08-17 12:53:08
-- **Passages collectés** : 4083
+- **Passage analysé** : 2026-08-17 15:37:11
+- **Passages collectés** : 4094
 - **Flotte** : 1243 véhicules sur 104 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -15,7 +15,7 @@
 |---|---|
 | paris | 533 |
 | boulogne-billancourt | 35 |
-| montreuil | 26 |
+| montreuil | 25 |
 | noisy-le-grand | 25 |
 | clichy | 23 |
 | champs-sur-marne | 22 |
@@ -28,8 +28,8 @@
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 525 |
-| Peugeot | 268 |
+| Renault | 524 |
+| Peugeot | 269 |
 | Citroen | 199 |
 | Toyota | 56 |
 | Fiat | 48 |
@@ -41,8 +41,8 @@
 
 | Type | Véhicules |
 |---|---|
-| combustion_diesel | 587 |
-| combustion | 571 |
+| combustion_diesel | 586 |
+| combustion | 572 |
 | hybrid | 67 |
 | electric | 17 |
 
