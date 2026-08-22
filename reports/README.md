@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-08-22 09:51 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
+> _Régénéré le 2026-08-22 13:16 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
 
-- **Passage analysé** : 2026-08-22 09:39:59
-- **Passages collectés** : 4543
+- **Passage analysé** : 2026-08-22 12:53:20
+- **Passages collectés** : 4556
 - **Flotte** : 1242 véhicules sur 103 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -28,7 +28,7 @@
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 528 |
+| Renault | 526 |
 | Peugeot | 266 |
 | Citroen | 199 |
 | Toyota | 54 |
@@ -41,8 +41,8 @@
 
 | Type | Véhicules |
 |---|---|
-| combustion | 582 |
-| combustion_diesel | 576 |
+| combustion | 581 |
+| combustion_diesel | 575 |
 | hybrid | 67 |
 | electric | 17 |
 
