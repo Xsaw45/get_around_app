@@ -1,10 +1,10 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-08-23 19:02 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
+> _Régénéré le 2026-08-23 21:48 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
 
-- **Passage analysé** : 2026-08-23 18:40:39
-- **Passages collectés** : 4674
-- **Flotte** : 1243 véhicules sur 103 communes
+- **Passage analysé** : 2026-08-23 21:23:02
+- **Passages collectés** : 4685
+- **Flotte** : 1244 véhicules sur 103 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
 ![Vue d'ensemble](overview.png)
@@ -13,7 +13,7 @@
 
 | Commune | Véhicules |
 |---|---|
-| paris | 526 |
+| paris | 525 |
 | boulogne-billancourt | 34 |
 | montreuil | 32 |
 | noisy-le-grand | 24 |
@@ -28,10 +28,10 @@
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 531 |
-| Peugeot | 267 |
+| Renault | 532 |
+| Peugeot | 266 |
 | Citroen | 197 |
-| Toyota | 51 |
+| Toyota | 52 |
 | Fiat | 48 |
 | Volkswagen | 35 |
 | Dacia | 28 |
@@ -43,10 +43,10 @@
 |---|---|
 | combustion_diesel | 582 |
 | combustion | 582 |
-| hybrid | 62 |
+| hybrid | 63 |
 | electric | 17 |
 
 ## Demande mesurée
 - Occupation moyenne : 35.3%
-- Véhicules avec ≥1 location détectée : 707 / 1913
+- Véhicules avec ≥1 location détectée : 709 / 1913
 - Véhicules à prix variable (pricing dynamique) : 288
