@@ -1,10 +1,10 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-08-25 21:54 · état collecte : 🟢 à jour (dernier passage il y a 0.3 h)_
+> _Régénéré le 2026-08-26 02:08 · état collecte : 🟢 à jour (dernier passage il y a 0.2 h)_
 
-- **Passage analysé** : 2026-08-25 21:34:14
-- **Passages collectés** : 4857
-- **Flotte** : 1250 véhicules sur 104 communes
+- **Passage analysé** : 2026-08-26 01:54:21
+- **Passages collectés** : 4870
+- **Flotte** : 1249 véhicules sur 104 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
 ![Vue d'ensemble](overview.png)
@@ -41,12 +41,12 @@
 
 | Type | Véhicules |
 |---|---|
-| combustion_diesel | 588 |
-| combustion | 584 |
+| combustion_diesel | 589 |
+| combustion | 583 |
 | hybrid | 60 |
 | electric | 17 |
 
 ## Demande mesurée
 - Occupation moyenne : 36.3%
 - Véhicules avec ≥1 location détectée : 734 / 1942
-- Véhicules à prix variable (pricing dynamique) : 295
+- Véhicules à prix variable (pricing dynamique) : 297
