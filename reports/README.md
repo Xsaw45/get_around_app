@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-09-01 00:50 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
+> _Régénéré le 2026-09-01 08:55 · état collecte : 🟢 à jour (dernier passage il y a 0.5 h)_
 
-- **Passage analysé** : 2026-09-01 00:26:07
-- **Passages collectés** : 5391
+- **Passage analysé** : 2026-09-01 08:26:25
+- **Passages collectés** : 5420
 - **Flotte** : 1251 véhicules sur 105 communes
 - **Prix/jour** : médiane 53 € (min 28 / max 181)
 
@@ -13,40 +13,40 @@
 
 | Commune | Véhicules |
 |---|---|
-| paris | 525 |
-| boulogne-billancourt | 33 |
-| montreuil | 28 |
+| paris | 530 |
+| boulogne-billancourt | 32 |
+| montreuil | 26 |
 | noisy-le-grand | 24 |
 | chessy | 22 |
 | champs-sur-marne | 22 |
-| saint-ouen-sur-seine | 19 |
-| clichy | 17 |
-| pantin | 17 |
-| malakoff | 16 |
+| saint-ouen-sur-seine | 18 |
+| pantin | 18 |
+| clichy | 16 |
+| malakoff | 15 |
 
 ## Parc par marque (top 8)
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 527 |
-| Peugeot | 264 |
-| Citroen | 199 |
-| Toyota | 53 |
+| Renault | 536 |
+| Peugeot | 271 |
+| Citroen | 202 |
+| Toyota | 55 |
 | Fiat | 48 |
-| Volkswagen | 32 |
-| Opel | 28 |
-| Dacia | 27 |
+| Volkswagen | 31 |
+| Dacia | 26 |
+| Opel | 26 |
 
 ## Motorisation
 
 | Type | Véhicules |
 |---|---|
-| combustion_diesel | 583 |
-| combustion | 568 |
-| hybrid | 65 |
+| combustion_diesel | 597 |
+| combustion | 567 |
+| hybrid | 68 |
 | electric | 19 |
 
 ## Demande mesurée
-- Occupation moyenne : 38.1%
-- Véhicules avec ≥1 location détectée : 833 / 2000
+- Occupation moyenne : 38.2%
+- Véhicules avec ≥1 location détectée : 842 / 2005
 - Véhicules à prix variable (pricing dynamique) : 316
