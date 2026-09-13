@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-09-12 23:26 · état collecte : 🟢 à jour (dernier passage il y a 0.6 h)_
+> _Régénéré le 2026-09-13 05:08 · état collecte : 🟢 à jour (dernier passage il y a 0.4 h)_
 
-- **Passage analysé** : 2026-09-12 22:50:00
-- **Passages collectés** : 6286
+- **Passage analysé** : 2026-09-13 04:41:46
+- **Passages collectés** : 6305
 - **Flotte** : 1257 véhicules sur 106 communes
 - **Prix/jour** : médiane 53 € (min 27 / max 267)
 
