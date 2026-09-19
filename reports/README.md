@@ -1,9 +1,9 @@
 # Getaround IDF — rapport d'étude de marché
 
-> _Régénéré le 2026-09-19 16:15 · état collecte : 🟢 à jour (dernier passage il y a 0.7 h)_
+> _Régénéré le 2026-09-19 23:25 · état collecte : 🟢 à jour (dernier passage il y a 0.7 h)_
 
-- **Passage analysé** : 2026-09-19 15:33:32
-- **Passages collectés** : 6711
+- **Passage analysé** : 2026-09-19 22:43:35
+- **Passages collectés** : 6731
 - **Flotte** : 1255 véhicules sur 106 communes
 - **Prix/jour** : médiane 53 € (min 27 / max 267)
 
@@ -21,14 +21,14 @@
 | champs-sur-marne | 22 |
 | asnieres-sur-seine | 18 |
 | pantin | 17 |
-| courbevoie | 16 |
 | saint-ouen-sur-seine | 15 |
+| courbevoie | 15 |
 
 ## Parc par marque (top 8)
 
 | Marque | Véhicules |
 |---|---|
-| Renault | 526 |
+| Renault | 525 |
 | Peugeot | 261 |
 | Citroen | 204 |
 | Toyota | 60 |
@@ -48,5 +48,5 @@
 
 ## Demande mesurée
 - Occupation moyenne : 43.0%
-- Véhicules avec ≥1 location détectée : 1076 / 2180
+- Véhicules avec ≥1 location détectée : 1077 / 2180
 - Véhicules à prix variable (pricing dynamique) : 1042
